@@ -26,8 +26,13 @@
 
 <body>
 <div id="title">
-  Sketch 0:  <strong>SVI & Public Transit by Tract</strong>
-  
+  Sketch 0:  <strong>SVI & Public Transit by Tract</strong><br>
+  <div class="dc-data-count">
+    <span class="filter-count"></span> selected out of <span class="total-count"></span> tracts | <a
+    href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
+  </div>
+  <br>
+  <div id="population">Containing population of 322903030</div>
 </div>
     
     
@@ -91,7 +96,7 @@
 <span class="factors">% taking public transportation above age 16<br>
 ACS/SE SE_A09005_003/SE_A09005_001*100<span>
 </div>
-
+  
 <div id="STATE">
 <strong>Tracts by State</strong><br>
 
@@ -100,14 +105,8 @@ ACS/SE SE_A09005_003/SE_A09005_001*100<span>
 </div>
 
 <div id="container3">
-  <div class="dc-data-count">
-    <span class="filter-count"></span> selected out of <span class="total-count"></span> tracts | <a
-    href="javascript:dc.filterAll(); dc.renderAll();">Reset All</a>
-  </div>
-  <br>
-  <div id="population">Containing population of 322903030</div>
-  
-  <div id="map">  MAP SHOWS NYC ONLY!!!!
+ 
+  <div id="map">  Map shows nyc portion only...
 </div>
 </div>
 

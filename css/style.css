@@ -13,7 +13,7 @@ a{
      padding:10px;
 	 position:absolute;
 	 left:0px;
-     top:80px;
+     top:100px;
      line-height:90%;
      width:400px;
      border-right:1px solid black;
@@ -22,7 +22,7 @@ a{
      padding:10px;
 	 position:absolute;
 	 left:420px;
-     top:80px;
+     top:100px;
      line-height:90%;
      width:400px;
      border-right:1px solid black;
@@ -31,7 +31,7 @@ a{
      padding:10px;
 	 position:absolute;
 	 left:840px;
-     top:80px;
+     top:100px;
      line-height:90%;
      width:600px;
      height:100%;
@@ -39,6 +39,8 @@ a{
  .dc-data-count{
      z-index:999;    
      width:600px; 
+     font-size:14px;
+     color:#c96840;
  }
  #map{
      height:400px;
@@ -48,17 +50,20 @@ a{
      text-align:left;
      z-index:999;
      width:600px; 
+     font-size:14px;
+     color:#c96840;
  }
  #title{
      position:fixed;
      left:0px;
      top:0px;
      padding:10px;
-     height:20px;
+     height:80px;
      background-color:#fff;
      width:100%;
      z-index:999;
      font-size:24px;
+     border-bottom:1px solid black;
  }
 
  .factors{

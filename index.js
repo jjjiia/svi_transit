@@ -31,15 +31,18 @@ function toTitleCase(str)
 }
 
 queue()
-.defer(d3.csv, "combined.csv")
+.defer(d3.csv, "svi_transit.csv")
+.defer(d3.csv, "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv")
 .await(ready);
 
-function ready(error, data){
+function ready(error,svi,covid){
 
     //### Create Crossfilter Dimensions and Groups
     //See the [crossfilter API](https://github.com/square/crossfilter/wiki/API-Reference) for reference.
         //https://dc-js.github.io/dc.js/docs/stock.html
-    var ndx = crossfilter(data);
+        
+    var combinedData = combineDatasets(svi,covid)
+    var ndx = crossfilter(combinedData);
     var all = ndx.groupAll();
 
     for(var t in themes){
@@ -57,7 +60,42 @@ function ready(error, data){
     
     drawMap()
 };
-
+function combineDatasets(svi,covid){
+     var latestDate = covid[covid.length-1].date
+     d3.select("#date").html("Showing data for "+latestDate)
+    
+    var covidByCounty = {}
+    
+    for(var c in covid){
+        var geoid ="_"+covid[c].fips
+        var cases = covid[c].cases
+        var deaths = covid[c].deaths
+        covidByCounty[geoid]={cases:cases,deaths:deaths}
+    }
+    var countiesWith = 0
+    var countiesWithout = 0
+    for(var s in svi){
+        var state = svi[s]["state ccode"]
+        if(state.length==1){
+           var county = "_0"+svi[s].STCNTY
+        }else{
+            var county ="_"+svi[s].STCNTY
+        }
+        if(covidByCounty[county]!=undefined){
+            countiesWith+=1
+            var deaths = covidByCounty[county].deaths
+            svi[s]["covid_deaths"]=deaths
+            var cases = covidByCounty[county].cases
+            svi[s]["covid_cases"]=cases
+        }else{
+            countiesWithout+=1
+            svi[s]["deaths"]=0
+            svi[s]["cases"]=0
+        }
+    }
+    //console.log([countiesWith,countiesWithout])
+    return svi
+}
 function onFiltered(data){
     var gids =[]
     var pop = 0
@@ -70,12 +108,12 @@ function onFiltered(data){
         hu+=parseInt(data[d].E_HU)
         
     }
-    d3.select("#population").html("Containing "+pop+" people<br><br>"+hu+" households<br><br> in "+area+" square miles")
+    d3.select("#population").html("Containing "+pop+" people, "+hu+" households, in "+area+" square miles")
     formatFilteredData(data)
     filterMap(gids)
 }
 function formatFilteredData(data){
-    console.log(data)
+    //console.log(data)
     var formatted = ""
     
 }
@@ -92,19 +130,16 @@ function drawMap(){
          container: 'map',
  		style: "mapbox://styles/jjjiia123/ckacf8p251rzb1io6p6bgsotf",
  		center:[-73.874615,40.751397],
-         zoom: 6,
+         zoom: 9,
          preserveDrawingBuffer: true,
-        minZoom:4,
-        maxBounds: bounds    
+        minZoom:9//,
+       // maxBounds: bounds    
      });
 
 }
 
 function filterMap(gids){
-    var resetfilter = ['=','GEOID',"0"];
-	map.setFilter("alltracts-7fygz6",resetfilter)
-    
-    var filter = ['in',["get",'GEOID'],["literal",gids]];
+  var filter = ['in',["get",'GEOID'],["literal",gids]];
 	map.setFilter("alltracts-7fygz6",filter)
 }
 function moveMap(data){
