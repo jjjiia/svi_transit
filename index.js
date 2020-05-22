@@ -2,7 +2,7 @@ var themes = ["SPL_THEME1","RPL_THEME1","SPL_THEME2","RPL_THEME2","SPL_THEME3","
 "SPL_THEME4", "RPL_THEME4", "SPL_THEMES", "RPL_THEMES"]
 
 //"F_THEME1","F_THEME2", "F_THEME3", "F_THEME4"
-
+var map;
 var themesDefinitions ={
     "SPL_THEME1":"Sum of series for Socioeconomic",
     "RPL_THEME1":"Percentile ranking for Socioeconomic",
@@ -22,7 +22,7 @@ var colors = {
     "THEME3":"#7a9263",
     "THEME4":"#4ba03d",
     "THEMES":"#000000",
-    "publicTransit":"#387390"
+    "publicTransit":"#000000"
 }
 
 function toTitleCase(str)
@@ -38,6 +38,7 @@ function ready(error, data){
 
     //### Create Crossfilter Dimensions and Groups
     //See the [crossfilter API](https://github.com/square/crossfilter/wiki/API-Reference) for reference.
+        //https://dc-js.github.io/dc.js/docs/stock.html
     var ndx = crossfilter(data);
     var all = ndx.groupAll();
 
@@ -47,14 +48,57 @@ function ready(error, data){
         barChart(column,ndx,100,500)
     }
     
-    barChart("percent_publicTransit",ndx,200,800)
+    barChart("percent_publicTransit",ndx,200,400)
     
    // barChart("tempMin",ndx,150,500,"#EDA929")
-    rowChart("STATE",ndx,"#agency-chart",800,500,20,"red") 
+    rowChart("STATE",ndx,700,400,20,"#000000") 
     dataCount(ndx,all)
     dc.renderAll();
+    
+    //drawMap()
 };
 
+function onFiltered(data){
+    var gids =[]
+    var pop = 0
+    var hu = 0
+    var area = 0
+    for(var d in data){
+        gids.push(data[d].FIPS)
+        pop+=parseInt(data[d].E_TOTPOP)
+        area+=parseInt(data[d].AREA_SQMI)
+        hu+=parseInt(data[d].E_HU)
+        
+    }
+    d3.select("#population").html("Containing "+pop+" people<br><br>"+hu+" households<br><br> in "+area+" square miles")
+    formatFilteredData(data)
+    //filterMap(gids)
+}
+function formatFilteredData(data){
+    console.log(data)
+    var formatted = ""
+    
+}
+function drawMap(){
+	mapboxgl.accessToken = 'pk.eyJ1IjoiampqaWlhMTIzIiwiYSI6ImNpbDQ0Z2s1OTN1N3R1eWtzNTVrd29lMDIifQ.gSWjNbBSpIFzDXU2X5YCiQ';
+    
+    map = new mapboxgl.Map({
+         container: 'container3',
+ 		style: "mapbox://styles/jjjiia123/ckacf8p251rzb1io6p6bgsotf",
+ 		center:[-73.874615,40.751397],
+         zoom: 6,
+         preserveDrawingBuffer: true,
+        minZoom:4    
+     });
+}
+
+function filterMap(gids){
+    var resetfilter = ['=','GEOID',"0"];
+	map.setFilter("alltracts-7fygz6",resetfilter)
+    
+    var filter = ['in',["get",'GEOID'],["literal",gids]];
+	map.setFilter("alltracts-7fygz6",filter)
+}
 
    /*
     <div id="temperature-chart">
@@ -80,16 +124,16 @@ function barChart(column,ndx,height,width){
          if(d[column]!=-999){
             return Math.round(d[column]*100)/100;
         }
-        
+    
         
     });
     var columnGroup = columnDimension.group();
-    
+        
     if(column.split("_")[0]=="RPL"){
-        width = 400
+        width = 200
         height = 100
-    }else if(column.split("_")[0]=="sPL"){
-        width = 600
+    }else if(column.split("_")[0]=="SPL"){
+        width = 200
     }
     
     var divName = column.split("_")[1]
@@ -100,7 +144,9 @@ function barChart(column,ndx,height,width){
     var chart = dc.barChart("#"+column);
     
     
-    
+    chart.on("filtered",function(){
+        onFiltered(columnDimension.top(Infinity))
+    })
     
     d3.select("#"+column).append("text").attr("class","reset")
         .on("click",function(){
@@ -148,25 +194,27 @@ function barChart(column,ndx,height,width){
       //          dc.renderAll();
 		
 }
-function rowChart(column, ndx,divName,height,width,topQ,color){
-    d3.select("#container").append("div").attr("id",column).style("width",width+"px").style("height",height+"px")
+function rowChart(column, ndx,height,width,topQ,color){
+    d3.select("#STATE").style("width",width+"px").style("height",height+"px")
     var chart = dc.rowChart("#"+column);
 
     var columnDimension = ndx.dimension(function (d) {
         return d[column];
     });
     var columnGroup = columnDimension.group();
-
+    chart.on("filtered",function(){
+        onFiltered(columnDimension.top(Infinity))
+    })
     chart.width(width)
         .height(height)
         .margins({top: 0, left: 250, right: 10, bottom: 20})
         .group(columnGroup)
         .dimension(columnDimension)
-    	.labelOffsetX(-220)
+    	.labelOffsetX(-240)
     	.labelOffsetY(12)
     	//.data(function(agencyGroup){return columnGroup.top(topQ)})
     	.ordering(function(d){ return -d.value })
-        .ordinalColors(["#000000"])
+        .ordinalColors([color])
         .label(function (d) {
             return d.key+": "+ d.value+ " tracts";
         })
@@ -174,9 +222,9 @@ function rowChart(column, ndx,divName,height,width,topQ,color){
         .title(function (d) {
             return d.value;
         })
+        .gap(2)
         .elasticX(true)
         .xAxis().ticks(4)
-    
 }
 function dataCount(dimension,group){
     dc.dataCount(".dc-data-count")
@@ -189,6 +237,7 @@ function dataCount(dimension,group){
             some:"%filter-count selected out of <strong>%total-count</strong> tracts | <a href='javascript:dc.filterAll(); dc.renderAll();''>Reset All</a>",
             all:"All  %total-count tracts selected."
         })
+        
 }
 
 //#### Version
