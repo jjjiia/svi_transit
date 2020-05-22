@@ -28,7 +28,7 @@ a{
      border-right:1px solid black;
  }
  #container3{
-     padding:0px;
+     padding:10px;
 	 position:absolute;
 	 left:840px;
      top:80px;
@@ -37,13 +37,15 @@ a{
      height:100%;
  }
  .dc-data-count{
-      padding:10px;
      z-index:999;    
      width:600px; 
  }
+ #map{
+     height:400px;
+     padding:20px;
+ }
  #population{
      text-align:left;
-     padding:10px;
      z-index:999;
      width:600px; 
  }

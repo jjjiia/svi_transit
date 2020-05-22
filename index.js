@@ -55,7 +55,7 @@ function ready(error, data){
     dataCount(ndx,all)
     dc.renderAll();
     
-    //drawMap()
+    drawMap()
 };
 
 function onFiltered(data){
@@ -72,7 +72,7 @@ function onFiltered(data){
     }
     d3.select("#population").html("Containing "+pop+" people<br><br>"+hu+" households<br><br> in "+area+" square miles")
     formatFilteredData(data)
-    //filterMap(gids)
+    filterMap(gids)
 }
 function formatFilteredData(data){
     console.log(data)
@@ -82,14 +82,22 @@ function formatFilteredData(data){
 function drawMap(){
 	mapboxgl.accessToken = 'pk.eyJ1IjoiampqaWlhMTIzIiwiYSI6ImNpbDQ0Z2s1OTN1N3R1eWtzNTVrd29lMDIifQ.gSWjNbBSpIFzDXU2X5YCiQ';
     
+    
+    var bounds = [
+    [-74.1, 40.6], // Southwest coordinates
+    [-73.6, 40.9] // Northeast coordinates
+    ];
+   
     map = new mapboxgl.Map({
-         container: 'container3',
+         container: 'map',
  		style: "mapbox://styles/jjjiia123/ckacf8p251rzb1io6p6bgsotf",
  		center:[-73.874615,40.751397],
          zoom: 6,
          preserveDrawingBuffer: true,
-        minZoom:4    
+        minZoom:4,
+        maxBounds: bounds    
      });
+
 }
 
 function filterMap(gids){
@@ -99,7 +107,9 @@ function filterMap(gids){
     var filter = ['in',["get",'GEOID'],["literal",gids]];
 	map.setFilter("alltracts-7fygz6",filter)
 }
-
+function moveMap(data){
+    
+}
    /*
     <div id="temperature-chart">
            Daily High Temperature
@@ -204,6 +214,7 @@ function rowChart(column, ndx,height,width,topQ,color){
     var columnGroup = columnDimension.group();
     chart.on("filtered",function(){
         onFiltered(columnDimension.top(Infinity))
+        moveMap(columnDimension.top(Infinity))
     })
     chart.width(width)
         .height(height)
